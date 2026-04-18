@@ -1,5 +1,5 @@
 variable "LLAMA_CPP_VERSION" {
-  default = "b8808"
+  default = "b8833"
 }
 
 group "default" {
