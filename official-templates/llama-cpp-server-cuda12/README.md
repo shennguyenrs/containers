@@ -1,29 +1,68 @@
-# Llama.cpp Server (Qwen-3.5 35B Optimized)
+# Llama.cpp Server (Qwen-3.6 35B Optimized)
 
-This is a RunPod container image based on `ghcr.io/ggml-org/llama.cpp`.
+A RunPod-optimized container image featuring the [llama.cpp](https://github.com/ggml-org/llama.cpp) server, pre-configured with the **Qwen 3.6 35B A3B Uncensored** model.
 
-It includes:
+## Features
 
-- Llama.cpp Server (running on port 8080)
-- Automatic download and startup with Qwen 3.5 35B GGUF
-- Python & Jupyter
-- RunPod standard utilities (Nginx, Proxy, etc.)
+- **Llama.cpp Server:** Optimized for CUDA 12.x environments.
+- **Model Included:** Automatically downloads and runs [Qwen-3.6-35B-A3B-Uncensored-HauhauCS-Aggressive-Q4_K_M.gguf](https://huggingface.co/HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive).
+- **RunPod Optimized:** Includes standard RunPod utilities (Nginx, Proxy, SSH, Filebrowser).
+- **Python Stack:** Multiple Python versions (3.9 to 3.13), JupyterLab, and `uv` for fast package management.
+- **Thinking Support:** Optimized for models with reasoning/thinking capabilities.
 
-## Custom Startup
+## Running Specifications
 
-The container uses `post_start.sh` to download the model and start the server.
+The container is configured with the following optimized flags for the Qwen 3.6 35B model. This command is executed automatically on startup via `/post_start.sh`:
 
-- **Port:** 8080 (Proxied through 8081 for external use)
-- **Model:** Qwen3.5-35B-A3B-Uncensored-HauhauCS-Aggressive-Q4_K_M.gguf
+```bash
+/app/llama-server \
+    -m /workspace/models/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive-Q4_K_M.gguf \
+    --host 0.0.0.0 \
+    --port 8080 \
+    -c 204800 \
+    -ngl 99 \
+    -t 4 \
+    --jinja \
+    --chat-template-kwargs '{"enable_thinking": true,"preserve_thinking": true}' \
+    --flash-attn auto \
+    --cache-type-k q8_0 \
+    --cache-type-v q8_0 \
+    --batch-size 1024
+```
 
-## Version Management
+### Key Specs:
+- **Context Window:** 204,800 tokens (`-c 204800`)
+- **GPU Offloading:** 99 layers (Full GPU offload)
+- **KV Cache:** Quantized to Q8_0 for memory efficiency at high context.
+- **Inference:** Flash Attention enabled (`--flash-attn auto`).
 
-The base image version is managed via the `LLAMA_CPP_VERSION` variable in `docker-bake.hcl`.
-Current version: `b8783`
+## Usage & Verification
 
-To build with a different version:
+### How to check active specs
+Once the container is running, you can verify the server configuration by calling the `/props` endpoint:
 
-1. Update `LLAMA_CPP_VERSION` in `docker-bake.hcl`.
-2. Run `./bake.sh llama-cpp-server-cuda12`.
+```bash
+curl http://localhost:8080/props
+```
 
-The resulting image will be tagged as `shennguyenrs/llama-cpp-server-cuda12:<LLAMA_CPP_VERSION>` (e.g., `shennguyenrs/llama-cpp-server-cuda12:b8783`).
+### RunPod (Recommended)
+This image is designed to be used as a template on RunPod. 
+- **Port 8080:** The `llama.cpp` server (proxied to 8081 for external access).
+- **Port 8888:** JupyterLab.
+- **Port 22:** SSH.
+- **Port 80:** Filebrowser.
+
+### Local Execution (Docker)
+To run this locally with GPU support:
+
+```bash
+docker run --gpus all -p 8080:8080 -v $(pwd)/workspace:/workspace shennguyenrs/llama-cpp-server-cuda12:b8882
+```
+
+> **Hardware Requirement:** This model (~24GB) and its large context window require a GPU with at least **32GB - 48GB VRAM** (e.g., A6000, A100, or H100) for optimal performance at full context.
+
+## Configuration
+
+The base image version and tags are managed via `docker-bake.hcl`. 
+- **Base Image:** `ghcr.io/ggml-org/llama.cpp:server-cuda12-b8882`
+- **GitHub:** [shennguyenrs/containers](https://github.com/shennguyenrs/containers)
