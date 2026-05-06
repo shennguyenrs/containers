@@ -52,7 +52,6 @@ RUN apt-get update --yes && \
 RUN [[ -n $RP_SKIP_PYTHON ]] && exit 0; \
   add-apt-repository ppa:deadsnakes/ppa -y && \
   apt-get install --yes --no-install-recommends \
-  python3.9-dev python3.9-venv python3.9-distutils \
   python3.10-dev python3.10-venv python3.10-distutils \
   python3.11-dev python3.11-venv python3.11-distutils \
   python3.12-dev python3.12-venv \
@@ -64,7 +63,6 @@ RUN [[ -n $RP_SKIP_PYTHON ]] && exit 0; \
 # Install pip
 RUN [[ -n $RP_SKIP_PYTHON ]] && exit 0; \
   curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
-  python3.9  get-pip.py && \
   python3.10 get-pip.py && \
   python3.11 get-pip.py && \
   python3.12 get-pip.py && \
@@ -73,7 +71,6 @@ RUN [[ -n $RP_SKIP_PYTHON ]] && exit 0; \
 
 # Install virtualenv
 RUN [[ -n $RP_SKIP_PYTHON ]] && exit 0; \
-  python3.9 -m pip install --upgrade pip virtualenv && \
   python3.10 -m pip install --upgrade pip virtualenv && \
   python3.11 -m pip install --upgrade pip virtualenv && \
   python3.12 -m pip install --upgrade pip virtualenv && \
