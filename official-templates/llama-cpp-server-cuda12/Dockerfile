@@ -96,6 +96,9 @@ RUN [[ -n $RP_SKIP_JUPYTER ]] && exit 0; \
 # Install filebrowser
 RUN curl -LsSf https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
 
+# Install hf cli
+RUN curl -LsSf https://hf.co/cli/install.sh | bash
+
 # NGINX Proxy
 COPY --from=proxy nginx.conf /etc/nginx/nginx.conf
 COPY --from=proxy snippets /etc/nginx/snippets
